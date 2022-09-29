@@ -1,0 +1,3 @@
+[submodule ".pio/libdeps/a-star32U4/wpi-32u4-library"]
+	path = .pio/libdeps/a-star32U4/wpi-32u4-library
+	url = https://github.com/WPIRoboticsEngineering/wpi-32u4-library
