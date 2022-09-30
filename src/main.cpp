@@ -156,7 +156,7 @@ void wallFollowController () {
      */
      if (behaviorState & MASK_WALLFOLLOW)  {
        Serial.println("wallFollowController:  activated");
-       //chassis.moveArch(10,25, true);
+       chassis.moveArch(10,25, true);
        chassis.turnFor(WALL_FOLLOW_TURNANGLE, WALL_FOLLOW_TURNRATE, true);
        behaviorState &= (~MASK_WALLFOLLOW);
      } else {
@@ -164,8 +164,6 @@ void wallFollowController () {
      }
    }
 }
-
-
 
 /*****
  *   wanderController
@@ -192,9 +190,6 @@ void wanderController() {
   } 
 }
 
-
-
-
 /*****
  *   PID Control Law for approch controller
  * 
@@ -220,6 +215,7 @@ void approachController() {
   /***
    * run if activated
    */
+
   if ( (behaviorState & MASK_APPROACH) && (fabs(eT_deltaT) > 0.5) ) {
     Serial.println("approachController:  activated");
     /****
@@ -385,18 +381,25 @@ void loop() {
          *  Test here turning on each
          *  basis behavior
          */
-        behaviorState|= MASK_APPROACH; 
-        approachController();
-        behaviorState &= (~MASK_APPROACH);
-
-        //behaviorState|= MASK_WALLFOLLOW;
-        //wallFollowController();
-        //behaviorState&= (~MASK_WALLFOLLOW);
-
-        //behaviorState|= MASK_WANDER;
-        //wanderController();
-        //behaviorState&= MASK_WANDER;
-
+        
+        if (behaviorState & MASK_WANDER)
+        {
+            wanderController();
+            //behaviorState &= (~MASK_WANDER);
+        }
+        else if (behaviorState & MASK_APPROACH)
+        {
+            //behaviorState |= MASK_APPROACH; 
+            approachController();
+            if (fabs(eT_deltaT) <= 0.5)
+                behaviorState &= MASK_WALLFOLLOW; //100
+            if (fabs(eT_deltaT) >= reference * 2)
+                behaviorState &= MASK_WANDER;
+        }
+        else if (behaviorState & MASK_WALLFOLLOW)
+        {
+            wallFollowController();
+        }
       } else {
         delay(5);
         Serial.println("checkMotion NOT complete");
