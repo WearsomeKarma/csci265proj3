@@ -340,6 +340,7 @@ void loop() {
       iEt= 0.0;
 
       wallFollowState= WALL_FOLLOW_ARCH;
+      behaviorState = MASK_WANDER | MASK_APPROACH | MASK_WALLFOLLOW;
 
       state= STATE_SENSE;
       break;
@@ -392,9 +393,9 @@ void loop() {
             //behaviorState |= MASK_APPROACH; 
             approachController();
             if (fabs(eT_deltaT) <= 0.5)
-                behaviorState &= MASK_WALLFOLLOW; //100
-            if (fabs(eT_deltaT) >= reference * 2)
-                behaviorState &= MASK_WANDER;
+                behaviorState |= MASK_WALLFOLLOW; //100
+            if (fabs(eT_deltaT) >= ref * 2)
+                behaviorState |= MASK_WANDER;
         }
         else if (behaviorState & MASK_WALLFOLLOW)
         {
@@ -404,8 +405,8 @@ void loop() {
         delay(5);
         Serial.println("checkMotion NOT complete");
       }
-     
- 
+      Serial.print("current state: ");
+      Serial.println(behaviorState);
       testIteration= testIteration + 1;
       Serial.print("testIteration= ");  
       Serial.println(testIteration);
