@@ -156,8 +156,8 @@ void wallFollowController () {
      */
      if (behaviorState & MASK_WALLFOLLOW)  {
        Serial.println("wallFollowController:  activated");
-       chassis.moveArch(10,25, true);
        chassis.turnFor(WALL_FOLLOW_TURNANGLE, WALL_FOLLOW_TURNRATE, true);
+       chassis.moveArch(10,25, true);
        behaviorState &= (~MASK_WALLFOLLOW);
      } else {
        break;
@@ -340,7 +340,7 @@ void loop() {
       iEt= 0.0;
 
       wallFollowState= WALL_FOLLOW_ARCH;
-      behaviorState = MASK_WANDER | MASK_APPROACH | MASK_WALLFOLLOW;
+      behaviorState = MASK_WANDER | MASK_APPROACH;
 
       state= STATE_SENSE;
       break;
@@ -364,6 +364,8 @@ void loop() {
       inches= distance * CM_TO_INCHES;
       Serial.print("rangefinder dist= ");
       Serial.println(inches);
+      Serial.print("eT_deltaT= ");
+      Serial.println(eT_deltaT);
       meas= inches;
 
       state= STATE_ACT;
@@ -388,19 +390,20 @@ void loop() {
             wanderController();
             //behaviorState &= (~MASK_WANDER);
         }
-        else if (behaviorState & MASK_APPROACH)
-        {
-            //behaviorState |= MASK_APPROACH; 
-            approachController();
-            if (fabs(eT_deltaT) <= 0.5)
-                behaviorState |= MASK_WALLFOLLOW; //100
-            if (fabs(eT_deltaT) >= ref * 2)
-                behaviorState |= MASK_WANDER;
-        }
         else if (behaviorState & MASK_WALLFOLLOW)
         {
             wallFollowController();
         }
+        else if (behaviorState & MASK_APPROACH)
+        {
+            //behaviorState |= MASK_APPROACH; 
+            approachController();
+            if (fabs(eT_deltaT) <= 0.55)
+                behaviorState = MASK_WALLFOLLOW | MASK_APPROACH ; //100
+            if (eT_deltaT < -ref)
+                behaviorState = MASK_WANDER | MASK_APPROACH;
+        }
+
       } else {
         delay(5);
         Serial.println("checkMotion NOT complete");
